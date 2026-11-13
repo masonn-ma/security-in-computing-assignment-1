@@ -22,12 +22,16 @@ def preflight(cfg, allow_unconstrained=False):
 def metadata(cfg, env):
     git_root = "/workspace" if os.path.isdir("/workspace/.git") else os.getcwd()
     try:
-        commit = subprocess.check_output(["git", "-C", git_root, "rev-parse", "HEAD"], text=True).strip()
+        commit = subprocess.check_output(
+            ["git", "-c", "core.autocrlf=true", "-C", git_root, "rev-parse", "HEAD"],
+            text=True,
+        ).strip()
     except (OSError, subprocess.CalledProcessError):
         commit = None
     try:
         dirty = bool(subprocess.check_output(
-            ["git", "-C", git_root, "status", "--porcelain"], text=True
+            ["git", "-c", "core.autocrlf=true", "-C", git_root, "status", "--porcelain"],
+            text=True,
         ).strip())
     except (OSError, subprocess.CalledProcessError):
         dirty = None
