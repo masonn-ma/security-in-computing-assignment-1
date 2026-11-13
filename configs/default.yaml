@@ -1,0 +1,25 @@
+profile: docker-constrained-1cpu-512m
+expected_limits:
+  cpu_quota: 1.0
+  memory_bytes: 536870912
+  swap_bytes: 0
+payload_sizes: [64, 256, 1024, 65536, 1048576]
+warmup_trials: 5
+measured_trials: 30
+random_seed: 20250101
+anova_alpha: 0.05
+output_dir: results
+export_formats: [csv, xlsx]
+algorithms:
+  symmetric: [aes-gcm, chacha20-poly1305, ascon-aead128]
+  asymmetric: [x25519, ffdh-group14, ml-kem-768]
+  hashing: [sha256, sha3-256, ascon-hash256]
+aead:
+  aes_key_bytes: 16
+  nonce_bytes: 12
+  tag_bytes: 16
+  ascon_key_bytes: 16
+  ascon_nonce_bytes: 16
+  ascon_tag_bytes: 16
+dh_group: rfc3526-group14
+pre_run_idle_seconds: 0

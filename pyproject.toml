@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iiot-crypto-bench"
+version = "0.1.0"
+description = "Reproducible, serial cryptography benchmark for an academic IIoT study"
+requires-python = ">=3.10"
+dependencies = [
+  "cryptography>=42,<46",
+  "PyYAML>=6.0,<7",
+  "psutil>=5.9,<7",
+  "pandas>=2.0,<3",
+  "openpyxl>=3.1,<4",
+  "scipy>=1.10,<2",
+  "pqcrypto>=0.3.4",
+  "ascon==1.4.0"
+]
+
+[project.scripts]
+crypto-bench = "crypto_bench.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
