@@ -1,9 +1,6 @@
 import os
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM, ChaCha20Poly1305
-from .ascon_binding import unavailable
-
-def _ascon():
-    unavailable()
+from .ascon_binding import aead_decrypt, aead_encrypt
 
 class SymmetricAdapter:
     def __init__(self, name):
@@ -18,10 +15,9 @@ class SymmetricAdapter:
         self._nonces.add(nonce)
         if self.name == "aes-gcm": out = AESGCM(self.key).encrypt(nonce, plaintext, None)
         elif self.name == "chacha20-poly1305": out = ChaCha20Poly1305(self.key).encrypt(nonce, plaintext, None)
-        else:
-            out = _ascon().encrypt(self.key, nonce, b"", plaintext)
+        else: out = aead_encrypt(self.key, nonce, b"", plaintext)
         return nonce, out
     def decrypt(self, nonce, ciphertext):
         if self.name == "aes-gcm": return AESGCM(self.key).decrypt(nonce, ciphertext, None)
         if self.name == "chacha20-poly1305": return ChaCha20Poly1305(self.key).decrypt(nonce, ciphertext, None)
-        return _ascon().decrypt(self.key, nonce, b"", ciphertext)
+        return aead_decrypt(self.key, nonce, b"", ciphertext)

@@ -22,4 +22,4 @@ aead:
   ascon_nonce_bytes: 16
   ascon_tag_bytes: 16
 dh_group: rfc3526-group14
-pre_run_idle_seconds: 0
+pre_run_idle_seconds: 30

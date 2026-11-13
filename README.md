@@ -20,7 +20,6 @@ Use `--allow-unconstrained` only deliberately. Results are flushed per trial
 to `results/<run-id>/` and interrupted runs remain incomplete. The benchmark
 never uses parallel workers. Keep the host idle, on consistent AC power and
 power mode. Ascon requires an explicitly installed final NIST SP 800-232
-binding from the pinned `vendor/ascon-c` submodule; the current adapter reports
-an explicit build blocker until that ctypes binding is compiled. It refuses to
-substitute obsolete Ascon v1.2 code. The other seven candidates can be
-validated independently while the binding is completed.
+binding from the pinned `vendor/ascon-c` submodule. The Docker image compiles
+the reference libraries and loads them through ctypes; it refuses to
+substitute obsolete Ascon v1.2 code.

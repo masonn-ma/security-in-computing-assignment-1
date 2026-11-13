@@ -1,4 +1,4 @@
-import csv, json, os, random, uuid
+import csv, json, os, random, time, uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from ..data_generation import payload
@@ -57,6 +57,8 @@ def run(cfg, category="all", algorithm=None, operation=None, payload_size=None,
                      "category": category, "algorithm": algorithm,
                      "operation": operation, "payload_size_bytes": payload_size}})
     (root / "metadata.json").write_text(json.dumps(meta, indent=2, default=str), encoding="utf-8")
+    if cfg.get("pre_run_idle_seconds", 0):
+        time.sleep(cfg["pre_run_idle_seconds"])
 
     def save(row):
         rows.append(row)
