@@ -73,7 +73,7 @@ docker compose build
 ```
 
 The image installs the pinned Python dependencies, compiles the official
-Ascon-AEAD128 and Ascon-Hash256 reference implementations as shared libraries,
+Ascon-AEAD128 and Ascon-Hash256 x86-64 optimized implementations as shared libraries,
 and configures the container Git trust rule needed to inspect the mounted
 repository.
 
@@ -357,7 +357,7 @@ docker compose build
 
 ### An Ascon shared library cannot be found
 
-Rebuild the image. The Dockerfile compiles both reference libraries into
+Rebuild the image. The Dockerfile compiles both optimized Ascon libraries into
 `/usr/local/lib`. Do not install the older PyPI `ascon` package as a workaround.
 
 ### Algorithm validation fails
