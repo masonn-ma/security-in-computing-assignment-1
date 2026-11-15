@@ -1,9 +1,10 @@
-"""ctypes binding for the pinned official Ascon SP 800-232 reference code."""
+"""ctypes binding for the pinned official Ascon SP 800-232 implementation."""
 
 from __future__ import annotations
 
 import ctypes
 import os
+from functools import lru_cache
 from pathlib import Path
 
 _U8 = ctypes.POINTER(ctypes.c_ubyte)
@@ -17,6 +18,7 @@ def _library_dir() -> Path:
     return Path(__file__).resolve().parents[3] / "vendor" / "ascon-c" / "build"
 
 
+@lru_cache(maxsize=None)
 def _load(name: str) -> ctypes.CDLL:
     candidates = {
         "aead": ("libascon_aead.so", "libascon_aead.dylib", "ascon_aead.dll"),
@@ -29,8 +31,16 @@ def _load(name: str) -> ctypes.CDLL:
             return ctypes.CDLL(str(path))
     raise RuntimeError(
         f"Ascon {name} library not found in {directory}; build the official "
-        "vendor/ascon-c reference libraries first"
+        "vendor/ascon-c libraries first"
     )
+
+
+@lru_cache(maxsize=None)
+def _function(name: str, symbol: str, argtypes: tuple[object, ...]):
+    function = getattr(_load(name), symbol)
+    function.argtypes = list(argtypes)
+    function.restype = ctypes.c_int
+    return function
 
 
 def _buffer(data: bytes, size: int | None = None):
@@ -44,11 +54,12 @@ def _pointer(buffer):
 def aead_encrypt(key: bytes, nonce: bytes, associated_data: bytes, plaintext: bytes) -> bytes:
     if len(key) != 16 or len(nonce) != 16:
         raise ValueError("Ascon-AEAD128 requires a 16-byte key and nonce")
-    library = _load("aead")
-    function = library.crypto_aead_encrypt
-    function.argtypes = [_U8, _ULL, _U8, ctypes.c_ulonglong, _U8,
-                         ctypes.c_ulonglong, _U8, _U8, _U8]
-    function.restype = ctypes.c_int
+    function = _function(
+        "aead",
+        "crypto_aead_encrypt",
+        (_U8, _ULL, _U8, ctypes.c_ulonglong, _U8,
+         ctypes.c_ulonglong, _U8, _U8, _U8),
+    )
     output = _buffer(b"\0" * (len(plaintext) + 16))
     plaintext_buffer = _buffer(plaintext)
     associated_data_buffer = _buffer(associated_data)
@@ -70,11 +81,12 @@ def aead_decrypt(key: bytes, nonce: bytes, associated_data: bytes, ciphertext: b
         raise ValueError("Ascon-AEAD128 requires a 16-byte key and nonce")
     if len(ciphertext) < 16:
         raise ValueError("Ascon ciphertext must contain a 16-byte tag")
-    library = _load("aead")
-    function = library.crypto_aead_decrypt
-    function.argtypes = [_U8, _ULL, _U8, _U8, ctypes.c_ulonglong, _U8,
-                         ctypes.c_ulonglong, _U8, _U8]
-    function.restype = ctypes.c_int
+    function = _function(
+        "aead",
+        "crypto_aead_decrypt",
+        (_U8, _ULL, _U8, _U8, ctypes.c_ulonglong, _U8,
+         ctypes.c_ulonglong, _U8, _U8),
+    )
     output = _buffer(b"\0" * len(ciphertext))
     ciphertext_buffer = _buffer(ciphertext)
     associated_data_buffer = _buffer(associated_data)
@@ -93,10 +105,11 @@ def aead_decrypt(key: bytes, nonce: bytes, associated_data: bytes, ciphertext: b
 
 
 def hash256(message: bytes) -> bytes:
-    library = _load("hash")
-    function = library.crypto_hash
-    function.argtypes = [_U8, _U8, ctypes.c_ulonglong]
-    function.restype = ctypes.c_int
+    function = _function(
+        "hash",
+        "crypto_hash",
+        (_U8, _U8, ctypes.c_ulonglong),
+    )
     output = _buffer(b"\0" * 32)
     message_buffer = _buffer(message)
     result = function(_pointer(output), _pointer(message_buffer), len(message))
