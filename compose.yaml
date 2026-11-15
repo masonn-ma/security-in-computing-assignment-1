@@ -1,0 +1,10 @@
+services:
+  benchmark:
+    build: .
+    cpus: "1.0"
+    mem_limit: 512m
+    memswap_limit: 512m
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    command: python -m crypto_bench preflight
