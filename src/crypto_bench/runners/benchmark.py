@@ -1,4 +1,4 @@
-import csv, json, os, random, time, uuid
+import csv, json, os, random, re, time
 from datetime import datetime, timezone
 from pathlib import Path
 from ..data_generation import payload
@@ -12,6 +12,26 @@ from ..algorithms.hashing import digest
 FIELDS = ["category","algorithm","operation","payload_size_bytes","trial",
           "execution_time_ns","execution_time_ms","baseline_rss_mib",
           "peak_rss_mib","incremental_peak_rss_mib","overhead_bytes","batch_count"]
+RUN_ID_PATTERN = re.compile(r"^(?P<date>\d{2}-\d{2}-\d{4})_v(?P<version>\d+)$")
+
+
+def _create_run_directory(output_dir, now=None):
+    output_path = Path(output_dir)
+    date_label = (now or datetime.now().astimezone()).strftime("%d-%m-%Y")
+    existing_versions = []
+    for path in output_path.glob(f"{date_label}_v*"):
+        match = RUN_ID_PATTERN.fullmatch(path.name)
+        if match and path.is_dir():
+            existing_versions.append(int(match.group("version")))
+    version = max(existing_versions, default=0) + 1
+    while True:
+        run_id = f"{date_label}_v{version}"
+        root = output_path / run_id
+        try:
+            root.mkdir(parents=True, exist_ok=False)
+            return run_id, root
+        except FileExistsError:
+            version += 1
 
 def _prepared(cat, name, op, data, adapter):
     """Prepare all inputs before timing, including decrypt ciphertext."""
@@ -45,9 +65,7 @@ def _overhead(cat, result, adapter=None):
 
 def run(cfg, category="all", algorithm=None, operation=None, payload_size=None,
         allow_unconstrained=False):
-    run_id = uuid.uuid4().hex[:12]
-    root = Path(cfg["output_dir"]) / run_id
-    root.mkdir(parents=True, exist_ok=False)
+    run_id, root = _create_run_directory(cfg["output_dir"])
     raw = root / "raw_measurements.csv"
     rows = []
     env = preflight(cfg, allow_unconstrained)

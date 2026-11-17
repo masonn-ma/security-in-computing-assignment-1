@@ -158,7 +158,7 @@ Measure process resident memory (RSS) during each candidate's workload, preferab
 - Peak RSS observed during the workload.
 - Peak-minus-baseline RSS as an approximate incremental figure, if meaningful.
 
-Use a documented method such as `psutil` sampling or an appropriate Linux process high-water mark. State the sampling method and its limitations. RSS includes Python, imported libraries, native libraries, and runtime overhead; it is **not** a precise measurement of algorithm-only memory. Do not use `tracemalloc` as the only measure because it does not account for all native allocations.
+Use a documented method such as `psutil` sampling or an appropriate Linux process high-water mark. This benchmark samples `psutil.Process.memory_info().rss` every 1 ms during each workload and takes the maximum observed value. Sampling can miss very short-lived allocations, and the measurement includes Python, imported libraries, native libraries, and runtime overhead; it is **not** a precise measurement of algorithm-only memory. Do not use `tracemalloc` as the only measure because it does not account for all native allocations.
 
 ### 5.3 Communication / output overhead (bytes)
 

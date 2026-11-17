@@ -143,7 +143,9 @@ docker compose run --rm benchmark python -m pytest -q
 
 The `run` command always executes serially. It creates a unique run directory,
 flushes completed rows to CSV, and writes metadata. The CLI does not expose a
-parallel-worker option.
+parallel-worker option. Run directories use the local date and a per-day
+version, such as `results/17-11-2026_v1` (slashes are not valid in Windows
+folder names).
 
 ### Command Reference
 
