@@ -41,11 +41,21 @@ def metadata(cfg, env):
             text=True,
         ).strip()
     except (OSError, subprocess.CalledProcessError):
-        ascon_revision = source_revision()
+        try:
+            ascon_revision = subprocess.check_output(
+                ["git", "-C", git_root, "rev-parse", "HEAD:vendor/ascon-c"],
+                text=True,
+            ).strip()
+        except (OSError, subprocess.CalledProcessError):
+            ascon_revision = source_revision()
     packages = {}
     for package in ("cryptography", "pqcrypto", "PyYAML", "pandas", "scipy"):
         try: packages[package] = version(package)
         except PackageNotFoundError: packages[package] = None
     return {"config": cfg, "environment": env, "dependencies": packages,
+            "ascon_build": {
+                "compiler": os.environ.get("ASCON_BUILD_COMPILER"),
+                "flags": os.environ.get("ASCON_BUILD_FLAGS"),
+            },
             "ascon_source_revision": ascon_revision, "git_commit": commit,
             "git_worktree_dirty": dirty}

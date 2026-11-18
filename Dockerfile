@@ -6,16 +6,18 @@ RUN pip install --no-cache-dir -r requirements.lock.txt
 COPY . .
 RUN git config --system --add safe.directory /workspace \
     && mkdir -p /usr/local/lib \
-    && gcc -shared -fPIC -O2 \
+    && gcc -shared -fPIC -std=c99 -O2 -fomit-frame-pointer -march=native -mtune=native \
        -I/workspace/vendor/ascon-c/crypto_aead/asconaead128/opt64 \
        -I/workspace/vendor/ascon-c/tests \
        /workspace/vendor/ascon-c/crypto_aead/asconaead128/opt64/aead.c \
        -o /usr/local/lib/libascon_aead.so \
-    && gcc -shared -fPIC -O2 \
+    && gcc -shared -fPIC -std=c99 -O2 -fomit-frame-pointer -march=native -mtune=native \
        -I/workspace/vendor/ascon-c/crypto_hash/asconhash256/opt64 \
        -I/workspace/vendor/ascon-c/tests \
        /workspace/vendor/ascon-c/crypto_hash/asconhash256/opt64/hash.c \
        -o /usr/local/lib/libascon_hash.so
 ENV PYTHONPATH=/workspace/src
 ENV ASCON_LIBRARY_DIR=/usr/local/lib
+ENV ASCON_BUILD_COMPILER=gcc
+ENV ASCON_BUILD_FLAGS="-std=c99 -O2 -fomit-frame-pointer -march=native -mtune=native"
 CMD ["python", "-m", "crypto_bench", "preflight"]

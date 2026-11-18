@@ -8,7 +8,10 @@ submodule. The Python adapter deliberately does not install the unrelated
 PyPI `ascon` package because that package implements the older competition
 variant rather than NIST SP 800-232. On the documented x86-64 benchmark
 target, the Dockerfile compiles the vendored `opt64` implementations into
-shared libraries and the adapter calls their documented C APIs with ctypes.
+shared libraries using the vendored project's release flags
+(`-std=c99 -O2 -fomit-frame-pointer -march=native -mtune=native`), and the
+adapter calls their documented C APIs with ctypes. Benchmark metadata records
+the Ascon source revision, compiler, and build flags.
 The library handles and function prototypes are cached so repeated
 measurements time the operation instead of repeated dynamic-loader setup.
 Missing libraries produce an explicit error instead of silently substituting
