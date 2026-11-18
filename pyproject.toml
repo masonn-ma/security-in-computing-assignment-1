@@ -14,8 +14,7 @@ dependencies = [
   "pandas>=2.0,<3",
   "openpyxl>=3.1,<4",
   "scipy>=1.10,<2",
-  "pqcrypto>=0.3.4",
-  "ascon==1.4.0"
+  "pqcrypto>=0.3.4"
 ]
 
 [project.scripts]
